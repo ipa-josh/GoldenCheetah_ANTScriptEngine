@@ -27,7 +27,7 @@ void getDeviceConfiguration(QList<DeviceConfiguration> &supported_devices) {
     }
 }
 
-void setup(QString cyclist="") {
+QString setup(QString &cyclist) {
 	//this is the path within the current directory where GC will look for
 	//files to allow USB stick support
 	QString localLibraryPath="Library/GoldenCheetah";
@@ -96,6 +96,8 @@ void setup(QString cyclist="") {
 		qDebug()<<"Cannot read athlete information for "<<cyclist;
 		exit(3);
 	}
+	
+	return home.absolutePath();
 }
 
 
@@ -125,10 +127,10 @@ int main(int argc, char *argv[]) {
     
     parser.process(app);
     
-	setup();
+    QString cyclist = parser.value(athleteOption);
+	QString athletePath = setup(cyclist);
         
     // for Device Pairing the controller is called with parent = NULL
-    QString athletePath;
     QObject *parent = NULL;
     DeviceConfiguration *dc = NULL;
     
@@ -144,12 +146,17 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-    ANT *myANTlocal = new ANT (parent, dc, parser.value(athleteOption));
+    ANT *myANTlocal = new ANT (parent, dc, cyclist);
     ANTLogger *logger = new ANTLogger(parent, athletePath);
+    
+    // Connect a logger
+    app.connect(myANTlocal, SIGNAL(receivedAntMessage(const unsigned char, const ANTMessage ,const timeval )), logger, SLOT(logRawAntMessage(const unsigned char, const ANTMessage ,const timeval)));
+    app.connect(myANTlocal, SIGNAL(sentAntMessage(const unsigned char, const ANTMessage ,const timeval )), logger, SLOT(logRawAntMessage(const unsigned char, const ANTMessage ,const timeval)));
+    
+    logger->open();
     
    /* 
     //start
-    logger->open();
     myANTlocal->start();
     myANTlocal->setup();
     
@@ -197,5 +204,10 @@ int main(int argc, char *argv[]) {
     
     RegularEvent regularEvent(parser.value(scriptRegularOption), engine, interval);
     
-    return app.exec();
+    int ret = app.exec();
+    
+    myANTlocal->stop();
+    logger->close();
+    
+    return ret;
 }
