@@ -21,6 +21,7 @@ add_executable(fec WIN32 main.cpp
 	RealtimeData.cpp
 	CalibrationData.cpp
 	Settings.cpp
+	RegularEvent.cpp
 )
 
 # Use the Widgets module from Qt 5.

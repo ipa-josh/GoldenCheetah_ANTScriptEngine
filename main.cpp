@@ -2,6 +2,7 @@
 #include "ANT/ANTLogger.h"
 #include "DeviceTypes.h"
 #include "Deps.h"
+#include "RegularEvent.h"
 #include <QDir>
 #include <QtScript/QtScript>
 
@@ -20,6 +21,9 @@ void fromScriptValue_RealtimeData(const QScriptValue &obj, RealtimeData &s)
   s.setName( obj.property("name").toString().toLatin1().data() );
   s.setWatts( obj.property("watts").toNumber() );
 }*/
+
+
+
 
 void getDeviceConfiguration(QList<DeviceConfiguration> &supported_devices) {
 	DeviceConfiguration *dc = NULL;
@@ -162,6 +166,7 @@ int main(int argc, char *argv[]) {
     //logger->close();
     */
     RealtimeData rtData;
+    int interval=1000;
     
     QScriptEngine engine;
     //qScriptRegisterMetaType(engine, toScriptValue_RealtimeData, fromScriptValue_RealtimeData);
@@ -171,6 +176,8 @@ int main(int argc, char *argv[]) {
     
     QScriptValue scriptrtData = engine.newQObject(&myANTlocal->getRealtimeData());
     engine.globalObject().setProperty("rtData", scriptrtData);
+    
+    engine.globalObject().setProperty("interval", interval);
     
     QString fileName("scripts/helloscript.js");
     QFile scriptFile(fileName);
@@ -189,6 +196,10 @@ int main(int argc, char *argv[]) {
                               .arg(result.toString());
         return -1;
     }
+    
+    interval = engine.globalObject().property("interval").toInt32();
+    
+    RegularEvent regularEvent("scripts/regular.js", engine, interval);
     
     return a.exec();
 }
