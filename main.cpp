@@ -5,24 +5,7 @@
 #include "RegularEvent.h"
 #include <QDir>
 #include <QtScript/QtScript>
-
-/*Q_DECLARE_METATYPE(RealtimeData)
-
-QScriptValue toScriptValue_RealtimeData(QScriptEngine *engine, const RealtimeData &s)
-{
-  QScriptValue obj = engine->newObject();
-  obj.setProperty("name", s.getName());
-  obj.setProperty("watts", s.getWatts());
-  return obj;
-}
-
-void fromScriptValue_RealtimeData(const QScriptValue &obj, RealtimeData &s)
-{
-  s.setName( obj.property("name").toString().toLatin1().data() );
-  s.setWatts( obj.property("watts").toNumber() );
-}*/
-
-
+#include <QCommandLineParser>
 
 
 void getDeviceConfiguration(QList<DeviceConfiguration> &supported_devices) {
@@ -117,12 +100,34 @@ void setup(QString cyclist="") {
 
 
 int main(int argc, char *argv[]) {
-	QCoreApplication a(argc, argv);
+	QCoreApplication app(argc, argv);
+	
+	QCommandLineParser parser;
+    parser.setApplicationDescription("simplified version of GoldenCheetah allowing to script trainings");
+    parser.addHelpOption();
+    
+    QCommandLineOption scriptInitOption(QStringList() << "i" << "script-init",
+            "Script file run at startup.",
+            "script-init",
+            "scripts/init.js");
+    parser.addOption(scriptInitOption);
+    
+    QCommandLineOption scriptRegularOption(QStringList() << "r" << "script-regular",
+            "Script file run at regular events [interval].",
+            "script-regular",
+            "scripts/regular.js");
+    parser.addOption(scriptRegularOption);
+    
+    QCommandLineOption athleteOption(QStringList() << "a" << "athlete",
+            "Name of athlete",
+            "athlete");
+    parser.addOption(athleteOption);
+    
+    parser.process(app);
     
 	setup();
         
     // for Device Pairing the controller is called with parent = NULL
-    QString cyclist;
     QString athletePath;
     QObject *parent = NULL;
     DeviceConfiguration *dc = NULL;
@@ -139,15 +144,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-    /*if (parent) {
-        cyclist = parent->context->athlete->cyclist;
-        athletePath = parent->context->athlete->home->root().canonicalPath();
-    } else {
-        cyclist = QString();
-        athletePath = QDir::tempPath();
-    }*/
-
-    ANT *myANTlocal = new ANT (parent, dc, cyclist);
+    ANT *myANTlocal = new ANT (parent, dc, parser.value(athleteOption));
     ANTLogger *logger = new ANTLogger(parent, athletePath);
     
    /* 
@@ -169,7 +166,6 @@ int main(int argc, char *argv[]) {
     int interval=1000;
     
     QScriptEngine engine;
-    //qScriptRegisterMetaType(engine, toScriptValue_RealtimeData, fromScriptValue_RealtimeData);
     
     QScriptValue scriptDevice = engine.newQObject(myANTlocal);
     engine.globalObject().setProperty("device", scriptDevice);
@@ -179,7 +175,7 @@ int main(int argc, char *argv[]) {
     
     engine.globalObject().setProperty("interval", interval);
     
-    QString fileName("scripts/helloscript.js");
+    QString fileName(parser.value(scriptInitOption));
     QFile scriptFile(fileName);
     scriptFile.open(QIODevice::ReadOnly);
     QTextStream stream(&scriptFile);
@@ -199,7 +195,7 @@ int main(int argc, char *argv[]) {
     
     interval = engine.globalObject().property("interval").toInt32();
     
-    RegularEvent regularEvent("scripts/regular.js", engine, interval);
+    RegularEvent regularEvent(parser.value(scriptRegularOption), engine, interval);
     
-    return a.exec();
+    return app.exec();
 }
