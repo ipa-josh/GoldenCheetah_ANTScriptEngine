@@ -7,6 +7,7 @@
 #include <QtScript/QtScript>
 #include <QCommandLineParser>
 #include <qmqtt/qmqtt_client.h>
+#include "TcxWriter.h"
 
 
 void getDeviceConfiguration(QList<DeviceConfiguration> &supported_devices) {
@@ -175,6 +176,9 @@ int main(int argc, char *argv[]) {
     
     QScriptEngine engine;
     
+    TcxRecord recorder;
+    myANTlocal->getRealtimeData().setDataLogger(&recorder);
+    
     QScriptValue scriptDevice = engine.newQObject(myANTlocal);
     engine.globalObject().setProperty("device", scriptDevice);
     
@@ -222,6 +226,15 @@ int main(int argc, char *argv[]) {
     
     myANTlocal->stop();
     logger->close();
+    
+    if(engine.globalObject().property("recorder_path").isString()) {
+		QString filename = engine.globalObject().property("recorder_path").toString();
+		QFile file(filename);
+		if (file.open(QIODevice::ReadWrite))
+			recorder.write(parser.value(scriptRegularOption), cyclist, file);
+		else
+			qDebug()<<QString::fromLatin1("failed to open file for recording: %0").arg(filename);
+	}
     
     return ret;
 }
