@@ -127,6 +127,11 @@ int main(int argc, char *argv[]) {
             "athlete");
     parser.addOption(athleteOption);
     
+    QCommandLineOption trainingFileOption(QStringList() << "t" << "trainingfile",
+            "Filepath to training file (*.erg, *.crs or *.mrc)",
+            "trainingfile");
+    parser.addOption(trainingFileOption);
+    
     parser.process(app);
     
     QString cyclist = parser.value(athleteOption);
@@ -187,6 +192,9 @@ int main(int argc, char *argv[]) {
     
     engine.globalObject().setProperty("interval", interval);
     
+    if(parser.isSet(trainingFileOption))
+		engine.globalObject().setProperty("erg_path", parser.value(trainingFileOption));
+    
     QString fileName(parser.value(scriptInitOption));
     QFile scriptFile(fileName);
     scriptFile.open(QIODevice::ReadOnly);
@@ -221,8 +229,10 @@ int main(int argc, char *argv[]) {
     interval = engine.globalObject().property("interval").toInt32();
     
     ErgFile *ergFile = NULL;
+    QString name = parser.value(scriptRegularOption);
     if(engine.globalObject().property("erg_path").isString()) {
 		QString filename = engine.globalObject().property("erg_path").toString();
+		name = filename;
 		Context *ctxt = new Context();
 		if(engine.globalObject().property("CP").isNumber()) ctxt->setCP(engine.globalObject().property("CP").toInt32());
 		ergFile = new ErgFile(filename, ERG, ctxt);
@@ -240,7 +250,7 @@ int main(int argc, char *argv[]) {
 		QString filename = engine.globalObject().property("recorder_path").toString();
 		QFile file(filename);
 		if (file.open(QIODevice::ReadWrite))
-			recorder.write(parser.value(scriptRegularOption), cyclist, file);
+			recorder.write(name, cyclist, file);
 		else
 			qDebug()<<QString::fromLatin1("failed to open file for recording: %0").arg(filename);
 	}
