@@ -23,6 +23,7 @@
 
 RealtimeData::RealtimeData()
 {
+	dataLogger = NULL;
     name[0] = '\0';
     hr= watts= altWatts= speed= wheelRpm= load= slope= torque= 0.0;
 	cadence = distance = altDistance = virtualSpeed = wbal = 0.0;
@@ -49,20 +50,24 @@ void RealtimeData::setAltWatts(double watts)
 void RealtimeData::setWatts(double watts)
 {
     this->watts = (int)watts;
+    if(dataLogger) dataLogger->setWatts(watts);
 }
 
 void RealtimeData::setAltDistance(double x)
 {
     this->altDistance = x;
+    if(dataLogger) dataLogger->setAltDistance(x);
 }
 
 void RealtimeData::setHr(double hr)
 {
     this->hr = (int)hr;
+    if(dataLogger) dataLogger->setHr(hr);
 }
 void RealtimeData::setSpeed(double speed)
 {
     this->speed = speed;
+    if(dataLogger) dataLogger->setSpeed(speed);
 }
 void RealtimeData::setWbal(double wbal)
 {
@@ -79,6 +84,7 @@ void RealtimeData::setWheelRpm(double wheelRpm)
 void RealtimeData::setCadence(double aCadence)
 {
     cadence = (int)aCadence;
+    if(dataLogger) dataLogger->setCadence(aCadence);
 }
 void RealtimeData::setSlope(double slope)
 {

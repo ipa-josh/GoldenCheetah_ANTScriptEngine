@@ -24,6 +24,16 @@
 #include <QString>
 #include <QApplication>
 
+class AbstractRealtimeDataLogger {
+public:
+
+    virtual void setWatts(double watts) = 0;
+    virtual void setHr(double hr) = 0;
+    virtual void setSpeed(double speed) = 0;
+    virtual void setCadence(double aCadence) = 0;
+    virtual void setAltDistance(double distance) = 0;
+};
+
 class RealtimeData : public QObject
 {
 
@@ -52,6 +62,8 @@ public:
     static const QList<DataSeries> &listDataSeries();
 
     RealtimeData();
+    
+    void setDataLogger(AbstractRealtimeDataLogger *logger) {dataLogger = logger;}
     
 public slots:
     //void reset(); // set all values to zero
@@ -158,6 +170,8 @@ private:
     bool trainerCalibRequired;
     bool trainerConfigRequired;
     bool trainerBrakeFault;
+    
+    AbstractRealtimeDataLogger *dataLogger;
 };
 
 #endif
