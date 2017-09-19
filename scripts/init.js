@@ -19,4 +19,13 @@ device.signalStrength.connect(function(channel, reliability) {
 	print("signalStrength = "+channel+": "+reliability);
 });
 x=0;
+last=0;
+
+
 interval=100;
+
+//setup mqtt client (for publishing display information)
+mqtt_host = "localhost";
+recorder_path = "/tmp/blub.tcx";
+CP = 300;
+erg_path = "/tmp/test.erg";
