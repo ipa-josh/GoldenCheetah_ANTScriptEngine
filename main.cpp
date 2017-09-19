@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QtScript/QtScript>
 #include <QCommandLineParser>
+#include <qmqtt/qmqtt_client.h>
 
 
 void getDeviceConfiguration(QList<DeviceConfiguration> &supported_devices) {
@@ -199,6 +200,19 @@ int main(int argc, char *argv[]) {
                               .arg(result.toString());
         return -1;
     }
+    
+    QMQTT::Client *mqtt_client = NULL;
+    if(engine.globalObject().property("mqtt_host").isString()) {
+		quint32 port = 1883;
+		if(engine.globalObject().property("mqtt_port").isNumber())
+			port = (quint32)engine.globalObject().property("mqtt_port").toUInt32();
+			
+		mqtt_client = new QMQTT::Client(engine.globalObject().property("mqtt_host").toString(), port);
+		mqtt_client->connect();
+		
+		QScriptValue scriptMQTTClient = engine.newQObject(mqtt_client);
+		engine.globalObject().setProperty("mqtt", scriptMQTTClient);
+	}
     
     interval = engine.globalObject().property("interval").toInt32();
     
