@@ -314,6 +314,7 @@ ANT::setLoad(double load)
 
     // load has changed
     this->load = load;
+    telemetry.setLoad(load);
 
     // if we have a vortex trainer connected, relay the change in target power to the brake
     if (vortexChannel != -1)
@@ -384,6 +385,7 @@ ANT::setGradient(double gradient)
 
     // gradient changed
     this->gradient = gradient;
+    telemetry.setSlope(gradient);
 
     // if we have a FE-C trainer connected, relay the change in simulated slope of trainer electronic
     if ((fecChannel != -1) && (antChannel[fecChannel]->capabilities() & FITNESS_EQUIPMENT_SIMUL_MODE_CAPABILITY))
@@ -405,6 +407,7 @@ ANT::setMode(int mode)
 
     // mode changed
     this->mode = mode;
+    telemetry.mode = mode;
 }
 
 void
