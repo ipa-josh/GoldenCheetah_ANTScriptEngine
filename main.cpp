@@ -220,7 +220,16 @@ int main(int argc, char *argv[]) {
     
     interval = engine.globalObject().property("interval").toInt32();
     
-    RegularEvent regularEvent(parser.value(scriptRegularOption), engine, interval);
+    ErgFile *ergFile = NULL;
+    if(engine.globalObject().property("erg_path").isString()) {
+		QString filename = engine.globalObject().property("erg_path").toString();
+		Context *ctxt = new Context();
+		if(engine.globalObject().property("CP").isNumber()) ctxt->setCP(engine.globalObject().property("CP").toInt32());
+		ergFile = new ErgFile(filename, ERG, ctxt);
+	}
+    
+    RegularEvent regularEvent(parser.value(scriptRegularOption), engine, interval, ergFile);
+    myANTlocal->connect(&regularEvent, SIGNAL(setLoad(double)), myANTlocal, SLOT(setLoad(double)));
     
     int ret = app.exec();
     
