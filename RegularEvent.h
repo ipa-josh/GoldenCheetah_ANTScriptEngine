@@ -34,6 +34,7 @@ public:
 		connect(load_timer, SIGNAL(timeout()), this, SLOT(loadUpdate()));
 		
 		timer->start(interval);
+		loadUpdate(); //first shot to setup the trainer
 	}
 	
 	void stop() {
@@ -49,4 +50,6 @@ public slots:
     void update();
     void loadUpdate();
     void startWorkout();
+    
+    int loatAtRelative(long msecs);
 };

@@ -21,20 +21,25 @@ void RegularEvent::startWorkout() {
 	if(load_timer && load_timer->isActive())
 		return;
 		
+	load_period.restart();
 	if(ergFile)
 		load_timer->start(LOADRATE);
+}
+
+int RegularEvent::loatAtRelative(long msecs) {
+    int curLap=0;
+    return ergFile->wattsAt(load_msecs+msecs, curLap);
 }
 	
 void RegularEvent::loadUpdate()
 {
-    int curLap;
 
     // the period between loadUpdate calls is not constant, and not exactly LOADRATE,
     // therefore, use a QTime timer to measure the load period
     load_msecs += load_period.restart();
 
     //if (status&RT_MODE_ERGO) {
-        long load = ergFile->wattsAt(load_msecs, curLap);
+        long load = loatAtRelative(0);
 
         // we got to the end!
         if (load == -100) {
