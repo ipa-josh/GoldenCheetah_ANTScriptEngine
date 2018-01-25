@@ -241,6 +241,9 @@ int main(int argc, char *argv[]) {
     RegularEvent regularEvent(parser.value(scriptRegularOption), engine, interval, ergFile);
     myANTlocal->connect(&regularEvent, SIGNAL(setLoad(double)), myANTlocal, SLOT(setLoad(double)));
     
+	QScriptValue scriptRegularEvent = engine.newQObject(&regularEvent);
+	engine.globalObject().setProperty("regularEvent", scriptRegularEvent);
+    
     int ret = app.exec();
     
     myANTlocal->stop();

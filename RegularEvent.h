@@ -34,14 +34,12 @@ public:
 		connect(load_timer, SIGNAL(timeout()), this, SLOT(loadUpdate()));
 		
 		timer->start(interval);
-		if(ergFile)
-			load_timer->start(LOADRATE);
 	}
 	
 	void stop() {
 		timer->stop();
 		load_timer->stop();
-		QCoreApplication::exit(0);
+		//QCoreApplication::exit(0);
 	}
 
 signals:
@@ -50,4 +48,5 @@ signals:
 public slots:
     void update();
     void loadUpdate();
+    void startWorkout();
 };

@@ -17,6 +17,14 @@ void RegularEvent::update() {
 		stop();
 }
 	
+void RegularEvent::startWorkout() {
+	if(load_timer && load_timer->isActive())
+		return;
+		
+	if(ergFile)
+		load_timer->start(LOADRATE);
+}
+	
 void RegularEvent::loadUpdate()
 {
     int curLap;
