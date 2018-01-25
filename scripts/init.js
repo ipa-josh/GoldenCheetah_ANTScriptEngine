@@ -26,6 +26,7 @@ interval=100;
 
 //setup mqtt client (for publishing display information)
 mqtt_host = "localhost";
+//mqtt_port = 8889;
 recorder_path = "/tmp/blub.tcx";
 CP = 300;
 erg_path = "/tmp/test.erg";

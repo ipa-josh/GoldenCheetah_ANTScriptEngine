@@ -11,8 +11,15 @@ else false;*/
 
 load = rtData.getLoad();
 
-if(load>50)	//start workout replay if trainer is actually used
+if(rtData.getWatts()>50)	//start workout replay if trainer is actually used
 	regularEvent.startWorkout();
+
+//current watt, current aim, aim in 5 min, aim in 10 min
+mqtt.publish(1,"/trainer_stats",rtData.getInterpolatedWatts()+";"+rtData.getLoad()+";"+regularEvent.loatAtRelative(1000*60*5)+";"+regularEvent.loatAtRelative(1000*60*10));
+
+print("interpolated Watts: "+rtData.getInterpolatedWatts());
+
+print(regularEvent.loatAtRelative(0)+" "+regularEvent.loatAtRelative(1000*60*5));
 
 if(load!=last) {
 	print(elapsed+": "+load);
