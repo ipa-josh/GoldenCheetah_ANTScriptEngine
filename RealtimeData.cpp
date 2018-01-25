@@ -25,7 +25,7 @@ RealtimeData::RealtimeData()
 {
 	dataLogger = NULL;
     name[0] = '\0';
-    hr= watts= altWatts= speed= wheelRpm= load= slope= torque= 0.0;
+    interpolatedWatts= hr= watts= altWatts= speed= wheelRpm= load= slope= torque= 0.0;
 	cadence = distance = altDistance = virtualSpeed = wbal = 0.0;
 	lap = msecs = lapMsecs = lapMsecsRemaining = 0;
     thb = smo2 = o2hb = hhb = 0.0;
@@ -36,6 +36,7 @@ RealtimeData::RealtimeData()
     trainerCalibRequired = false;
     trainerConfigRequired = false;
     trainerBrakeFault = false;
+    interpolationFactor = 0.8;
     memset(spinScan, 0, 24);
 }
 
@@ -47,10 +48,16 @@ void RealtimeData::setAltWatts(double watts)
 {
     this->altWatts = (int)watts;
 }
+void RealtimeData::setInterpolationFactor(double interpolationFactor)
+{
+    this->interpolationFactor = interpolationFactor;
+}
 void RealtimeData::setWatts(double watts)
 {
-    this->watts = (int)watts;
+    this->watts = watts;
     if(dataLogger) dataLogger->setWatts(watts);
+    
+    this->interpolatedWatts = interpolationFactor*this->interpolatedWatts + (1.-interpolationFactor)*watts;
 }
 
 void RealtimeData::setAltDistance(double x)
@@ -155,6 +162,14 @@ double RealtimeData::getAltWatts() const
 double RealtimeData::getWatts() const
 {
     return watts;
+}
+double RealtimeData::getInterpolatedWatts() const
+{
+    return interpolatedWatts;
+}
+double RealtimeData::getInterpolationFactor() const
+{
+    return interpolationFactor;
 }
 double RealtimeData::getHr() const
 {

@@ -95,6 +95,7 @@ public slots:
     void setLPS(double);
     void setRPS(double);
     void setTorque(double);
+    void setInterpolationFactor(double);
 
     const char *getName() const;
 
@@ -106,6 +107,7 @@ public slots:
     double getO2Hb() const;
 
     double getWatts() const;
+    double getInterpolatedWatts() const;
     double getAltWatts() const;
     double getAltDistance() const;
     double getHr() const;
@@ -127,6 +129,7 @@ public slots:
     double getLPS() const;
     double getRPS() const;
     double getTorque() const;
+    double getInterpolationFactor() const;
 
     void setTrainerStatusAvailable(bool status);
     bool getTrainerStatusAvailable() const;
@@ -148,7 +151,8 @@ private:
     char name[64];
 
     // realtime telemetry
-    double hr, watts, altWatts, altDistance, speed, wheelRpm, load, slope, lrbalance;
+    double hr, watts, interpolatedWatts, altWatts, altDistance, speed, wheelRpm, load, slope, lrbalance;
+    double interpolationFactor;
     double cadence;      // in rpm
     double smo2, thb;
     double lte, rte, lps, rps; // torque efficiency and pedal smoothness
