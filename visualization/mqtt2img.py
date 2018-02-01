@@ -27,24 +27,26 @@ def redner(fn, current, aim, diagrams=[]):
 	
 	# get a drawing context
 	d = ImageDraw.Draw(im)
-
-	# draw text, half opacity
-	d.text((10,30), str(current), font=fnt, fill=(0,0,0,255))
-	# draw text, full opacity
-	dif = min(1.,max(0.,abs(current-aim)-20)/20.)
-	print dif
-	
-	d.text((150,30), str(aim), font=fnt, fill=(int(round(255*dif)),0,0,255))
 	
 	for diagram in diagrams:
 		last = None
 		for v in diagram[1]:
 			cur = (im.size[0]*v[0], im.size[1]*(1-v[1]/max_watts))
 			if last!=None:
-				d.line((last[0], last[1], cur[0], cur[1]), fill=diagram[0] )
+				if diagram[2]:
+					d.polygon( [(last[0], last[1]), (cur[0], cur[1]), (cur[0], im.size[1]), (last[0], im.size[1])], fill=diagram[0] )
+				else:
+					d.line((last[0], last[1], cur[0], cur[1]), fill=diagram[0] )
 			last = cur
 		if last!=None and last[1]!=im.size[1]:
 			d.line((last[0], im.size[1], last[0], last[1]), fill=diagram[0] )
+
+	# draw text, half opacity
+	d.text((10,30), str(current), font=fnt, fill=(0,0,0,255))
+	# draw text, full opacity
+	dif = min(1.,max(0.,abs(current-aim)-20)/20.)
+	
+	d.text((150,30), str(aim), font=fnt, fill=(int(round(255*dif)),0,0,255))
 	
 	#im.show()
 	im.save(fn, "PNG")
@@ -105,10 +107,19 @@ def on_message(client, userdata, msg):
 		diagram_plan.sort()
 		
 		#pairs of (percent of time, aimed watts)
-		diagram1 = ((0,0,0,255), diagram_plan)
-		diagram2 = ((255,0,0,255), diagram_cur)
+		diagram1 = ((0,0,200,255), diagram_plan, True)
+		diagram2 = ((255,255,0,255), diagram_cur, False)
 
-		redner(fn, 22,234, [diagram1,diagram2])
+		redner(fn, cur,aim, [diagram1,diagram2])
+
+def test():
+	diagram1 = ((0,0,200,255), [[0.0,100], [0.5, 200], [1.0,200]], True)
+	diagram2 = ((255,255,0,255), [[0.0,100], [0.75,200]], False)
+	redner(fn, 22,234, [diagram1,diagram2])
+
+if __name__ == "__main__":
+	test()
+	exit()
 
 redner_msg(fn, "  Start!")
 
